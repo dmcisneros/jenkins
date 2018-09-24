@@ -1,0 +1,33 @@
+pipeline {
+	agent any
+  stages {
+		stage('TEST') {
+			steps {
+				echo 'Passing Sonar attributes'
+				build job: 'TEST'
+			}
+		}
+		stage('COMPILE') {
+			steps {
+			parallel( modules:{
+				echo 'gradle build modules'
+				build job: 'BUILD_MODULES'
+				//sh 'cmaot-workspace/gradlew deploy -p cmaot-workspace/modules/'
+			},theme:{
+				echo 'build theme'
+				build job: 'BUILD_THEME'
+				//sh 'cmaot-workspace/gradlew deploy -p cmaot-workspace/themes/' 
+			},layouts:{
+				echo 'build layouts'
+				build job: 'BUILD_LAYOUTS'
+			}
+			)}
+		}
+		stage('UPLOAD') {
+			steps {
+				echo 'Uploading to artifactory'
+				build job: 'UPLOAD_ARTIFACTORY'
+			}
+		}
+  }
+}
